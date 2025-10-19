@@ -1,12 +1,12 @@
-package ru.otus.httpBot.service;
+package ru.shiba.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import ru.otus.httpBot.exceptions.EmptyMessageExceprion;
-import ru.otus.httpBot.exceptions.IncorrectMessageException;
-import ru.otus.httpBot.model.Notification;
-import ru.otus.httpBot.model.NotificationStatus;
+import ru.shiba.exceptions.EmptyMessageExceprion;
+import ru.shiba.exceptions.IncorrectMessageException;
+import ru.shiba.model.Notification;
+import ru.shiba.model.NotificationStatus;
 
 import java.time.LocalDateTime;
 import java.util.regex.Matcher;

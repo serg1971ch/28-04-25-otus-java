@@ -1,5 +1,5 @@
 -- liquibase formated sql
-
+CREATE DATABASE telegramDB;
 -- changeset author:1
 CREATE TABLE notifications (
                                id SERIAL NOT NULL PRIMARY KEY,

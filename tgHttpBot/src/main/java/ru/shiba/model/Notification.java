@@ -1,4 +1,4 @@
-package ru.otus.httpBot.model;
+package ru.shiba.model;
 
 import jakarta.persistence.*;
 import lombok.*;

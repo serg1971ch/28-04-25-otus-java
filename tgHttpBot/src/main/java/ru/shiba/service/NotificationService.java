@@ -1,9 +1,10 @@
-package ru.otus.httpBot.service;
+package ru.shiba.service;
 
 
 import org.springframework.stereotype.Service;
-import ru.otus.httpBot.model.Notification;
-import ru.otus.httpBot.exceptions.IncorrectMessageException;
+import ru.shiba.exceptions.IncorrectMessageException;
+import ru.shiba.model.Notification;
+
 import java.time.LocalDateTime;
 import java.util.Optional;
 

@@ -1,10 +1,9 @@
-package ru.otus.httpBot.configuration;
+package ru.shiba.configuration;
 
 
 import com.pengrad.telegrambot.*;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.request.SendMessage;
-import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

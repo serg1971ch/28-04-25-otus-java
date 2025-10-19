@@ -1,4 +1,4 @@
-package ru.otus.httpBot;
+package ru.shiba;
 
 public class CommandConst {
     public static final String START_CMD = "/start";
@@ -9,7 +9,7 @@ public class CommandConst {
     public static final String HELP_MSG_UNCOMPLETED_PHOTO = "Выберите фото с нарушением: ";
     public static final String HELP_MSG_DESCRIPTION = "Описание замечания: ";
     public static final String CALLBACK_VIEW_REMARKS = "Просмотр замечания: ";
-    public static final String ADD_REMARK = "/add";
+    public static final String ADD_REMARK = "action_add_remark";
 //    public static final String CALLBACK_ADD_REMARK = "/add";
     public static final String INVALID_MSG = "Неверное сообщение или команда";
 }

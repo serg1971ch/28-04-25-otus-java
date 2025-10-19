@@ -1,4 +1,4 @@
-package ru.otus.httpBot.exceptions;
+package ru.shiba.exceptions;
 
 public class IncorrectMessageException extends RuntimeException {
     public IncorrectMessageException(String message) {

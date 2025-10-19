@@ -1,4 +1,4 @@
-package ru.otus.httpBot;
+package ru.shiba;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

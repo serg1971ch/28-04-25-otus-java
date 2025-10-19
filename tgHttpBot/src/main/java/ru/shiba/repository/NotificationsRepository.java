@@ -1,7 +1,7 @@
-package ru.otus.httpBot.repository;
+package ru.shiba.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.otus.httpBot.model.Notification;
+import ru.shiba.model.Notification;
 
 import java.time.LocalDateTime;
 import java.util.Collection;

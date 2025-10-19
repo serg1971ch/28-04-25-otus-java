@@ -2,6 +2,7 @@ package ru.otus.httpBot.listener;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
+import com.pengrad.telegrambot.model.CallbackQuery;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
@@ -20,7 +21,7 @@ import ru.otus.httpBot.service.NotificationService;
 import java.util.List;
 
 @Service
-public class TelegramBotUpdatesListener implements UpdatesListener {
+public class  TelegramBotUpdatesListener implements UpdatesListener {
 
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
 
@@ -39,34 +40,86 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     @Override
     public int process(List<Update> updates) {
+//        for (Update update : updates) {
+//            Message message = update.message();
+//            if (message != null && message.text() != null) {
+//                String chatText = message.text();
+//                long chatId = message.chat().id();
+//
+//                if (chatText.startsWith(CommandConst.START_CMD)) {
+//                    telegramBot.execute(new SendMessage(chatId, CommandConst.WELCOME + message.from().firstName() + "!"));
+//                    telegramBot.execute(new SendMessage(chatId, CommandConst.HELP_MSG_TITLE));
+//                    notificationService.parseMessage((int) chatId, chatText);
+//                    // Вызов метода для отправки кнопки меню
+//                    sendMainMenu(chatId);
+//                }
+//            }
+//
+//            // Обработка нажатия кнопки
+//            if (update.callbackQuery() != null) {
+//                assert message != null;
+//                String chatText = message.text();
+//                long chatId = message.chat().id();
+//                String callbackData = update.callbackQuery().data();
+//                if ("callback_data".equals(callbackData)) {
+//                    telegramBot.execute(new SendMessage(chatId, "Вы нажали кнопку!"));
+//                }
+//            }
+//        }
+//        return UpdatesListener.CONFIRMED_UPDATES_ALL;
         for (Update update : updates) {
-            Message message = update.message();
-            if (message != null && message.text() != null) {
-                String chatText = message.text();
-                long chatId = message.chat().id();
-
-                if (chatText.startsWith(CommandConst.START_CMD)) {
-                    telegramBot.execute(new SendMessage(chatId, CommandConst.WELCOME + message.from().firstName() + "!"));
-                    telegramBot.execute(new SendMessage(chatId, CommandConst.HELP_MSG_TITLE));
-                    notificationService.parseMessage((int) chatId, chatText);
-                    // Вызов метода для отправки кнопки меню
-                    sendMainMenu(chatId);
+            try {
+                // Handle message updates
+                if (update.message() != null && update.message().text() != null) {
+                    processMessageUpdate(update.message());
                 }
-            }
 
-            // Обработка нажатия кнопки
-            if (update.callbackQuery() != null) {
-                assert message != null;
-                String chatText = message.text();
-                long chatId = message.chat().id();
-                String callbackData = update.callbackQuery().data();
-                if ("callback_data".equals(callbackData)) {
-                    telegramBot.execute(new SendMessage(chatId, "Вы нажали кнопку!"));
+                // Handle callback query updates
+                if (update.callbackQuery() != null) {
+                    processCallbackQuery(update.callbackQuery());
                 }
+            } catch (Exception e) {
+                logger.error("Error processing update", e);
             }
         }
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
     }
+
+    private void processMessageUpdate(Message message) {
+        String chatText = message.text();
+        long chatId = message.chat().id();
+
+        if (chatText.startsWith(CommandConst.START_CMD)) {
+            telegramBot.execute(new SendMessage(chatId, CommandConst.WELCOME + message.from().firstName() + "!"));
+            telegramBot.execute(new SendMessage(chatId, CommandConst.HELP_MSG_TITLE));
+            notificationService.parseMessage((int) chatId, chatText);
+            sendMainMenu(chatId);
+        }
+    }
+
+    private void processCallbackQuery(CallbackQuery callbackQuery) {
+        long chatId = callbackQuery.message().chat().id();
+        String callbackData = callbackQuery.data();
+
+        if ("callback_data".equals(callbackData)) {
+            telegramBot.execute(new SendMessage(chatId, "Вы нажали кнопку!"));
+        }
+    }
+
+    private void sendMainMenu(long chatId) {
+        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup(
+                new KeyboardButton[][] {
+                        { new KeyboardButton("Отправить замечания") }
+                }
+        ).resizeKeyboard(true).oneTimeKeyboard(true);
+
+        SendMessage message = new SendMessage(chatId, "Выберите опцию:")
+                .replyMarkup(keyboard);
+
+        telegramBot.execute(message);
+    }
+
+}
 
 //    private void sendNotificationButton(Message message) {
 //        long chatId = message.chat().id();
@@ -79,16 +132,16 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 //        telegramBot.execute(chatId, "Нажмите кнопку для отправки уведомлений:", keyboard);
 //    }
 
-    private void sendMainMenu(long chatId) {
-        KeyboardButton button = new KeyboardButton("Отправить замечания");
-        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup(button).resizeKeyboard(true).oneTimeKeyboard(true);
-
-        SendMessage message = new SendMessage(chatId, "Выберите опцию:")
-                .replyMarkup(keyboard);
-
-        telegramBot.execute(message);
-    }
-}
+//    private void sendMainMenu(long chatId) {
+//        KeyboardButton button = new KeyboardButton("Отправить замечания");
+//        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup(button).resizeKeyboard(true).oneTimeKeyboard(true);
+//
+//        SendMessage message = new SendMessage(chatId, "Выберите опцию:")
+//                .replyMarkup(keyboard);
+//
+//        telegramBot.execute(message);
+//    }
+//}
 
 
 //private void handleCallbackQuery(CallbackQuery callbackQuery) {
