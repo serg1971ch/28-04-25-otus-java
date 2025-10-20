@@ -16,3 +16,8 @@ spring:
 logging:
   level:
     ROOT: INFO
+
+
+app:
+  download:
+    dir:C:\Users\ЗС\OneDrive\Рабочий стол\28-04-25-otus-java\tgHttpBot\src\main\resources\photos:

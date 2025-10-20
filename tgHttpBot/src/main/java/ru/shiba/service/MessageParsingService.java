@@ -17,7 +17,7 @@ public class MessageParsingService {
     private final Logger logger = LoggerFactory.getLogger(MessageParsingService.class);
     private NotificationStatus statusComplete;
 
-    private static final Pattern TASK_PATTERN = Pattern.compile("^(.*;)(.[0-9]{3})(.[да|нет])$");
+    private static final Pattern TASK_PATTERN = Pattern.compile("(.*;)(.[0-9]{3})(.[да|нет]).+");
 
     // Если "s" в конце - это условное обозначение, и нам нужно его убрать:
     // private static final Pattern TASK_PATTERN_WITH_S = Pattern.compile("^(.*?)s? +(\\d+)s? +(.*)s?$");
@@ -59,8 +59,6 @@ public class MessageParsingService {
 
         } else {
             logger.error("Failed to parse remark message. Input: '{}'", userInput);
-            // Если нужно, здесь можно добавить более конкретные сообщения об ошибке,
-            // например, если не найден приоритет или время.
             throw new IncorrectMessageException("Неверный формат сообщения. Ожидается: 'Название замечания Позиция_установки Описание нарушения'");
         }
     }
