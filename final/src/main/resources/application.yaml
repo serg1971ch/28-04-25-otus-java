@@ -1,0 +1,31 @@
+server:
+  port: 8189
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/telegramBot
+    password: 1234
+    username: postgres
+  jpa:
+    database: POSTGRESQL
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+
+  liquibase:
+    change-log: classpath:/liquibase/changelog-master.yml
+
+minio:
+  bucket: images
+  url: http://localhost:9000
+  accessKey: minio
+  secretKey: minio123
+
+logging:
+  level:
+    ROOT: INFO
+
+app:
+  download:
+   dir:
+     C:\Users\Honor\Desktop\26_октября\minioBot\src\main\resources\photos
