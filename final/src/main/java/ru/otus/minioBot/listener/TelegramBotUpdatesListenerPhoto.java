@@ -11,14 +11,11 @@ import com.pengrad.telegrambot.response.GetFileResponse;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import ru.otus.minioBot.model.ChatState;
 import ru.otus.minioBot.model.Notification;
 import ru.otus.minioBot.service.ImageServiceDB;
-import ru.otus.minioBot.service.ImageServiceFS;
-import ru.otus.minioBot.service.ImageServiceMinio;
 import ru.otus.minioBot.service.NotificationService;
 import ru.otus.minioBot.web.dto.RemarkWithImageDTO;
 

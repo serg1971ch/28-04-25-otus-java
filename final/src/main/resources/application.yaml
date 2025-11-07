@@ -12,7 +12,6 @@ spring:
     hibernate:
       ddl-auto: create-drop
 
-
   liquibase:
     change-log: classpath:/liquibase/changelog-master.yml
 
@@ -29,4 +28,4 @@ logging:
 app:
   download:
    dir:
-     C:\Users\Honor\Desktop\для демонстрации\minioBot\src\main\resources\photos
+     C:\Users\Honor\Desktop\26_октября\minioBot\src\main\resources\photos
