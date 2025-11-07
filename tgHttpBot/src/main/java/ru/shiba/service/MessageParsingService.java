@@ -1,0 +1,65 @@
+package ru.shiba.service;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import ru.shiba.exceptions.EmptyMessageExceprion;
+import ru.shiba.exceptions.IncorrectMessageException;
+import ru.shiba.model.Notification;
+import ru.shiba.model.NotificationStatus;
+
+import java.time.LocalDateTime;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+@Service
+public class MessageParsingService {
+    private final Logger logger = LoggerFactory.getLogger(MessageParsingService.class);
+    private NotificationStatus statusComplete;
+
+    private static final Pattern TASK_PATTERN = Pattern.compile("(.*;)(.[0-9]{3})(.[да|нет]).+");
+
+    // Если "s" в конце - это условное обозначение, и нам нужно его убрать:
+    // private static final Pattern TASK_PATTERN_WITH_S = Pattern.compile("^(.*?)s? +(\\d+)s? +(.*)s?$");
+
+
+    public Notification parseRemarkMessage(String userInput, int chatId) {
+        if (userInput == null || userInput.trim().isEmpty()) {
+            throw new IncorrectMessageException("Сообщение не может быть пустым.");
+        }
+
+
+        // Если "s" в конце — это просто пример, и нам нужно обработать строку без него:
+        String cleanedInput = userInput.trim();
+        // if (cleanedInput.endsWith("s")) {
+        //     cleanedInput = cleanedInput.substring(0, cleanedInput.length() - 1).trim();
+        // }
+
+        Matcher matcher = TASK_PATTERN.matcher(cleanedInput);
+
+        if (matcher.matches()) {
+            String description = matcher.group(1).trim();
+            String position = matcher.group(2).trim();
+            String status = matcher.group(3).trim();
+
+            // Тут можно добавить дополнительную валидацию, например, что remarkTitle и violationDescription не пустые
+            if (description.isEmpty() || position.isEmpty() || status.isEmpty()) {
+                throw new EmptyMessageExceprion("описание, позиция и статус нарушения не могут быть пустыми");
+            }
+
+            logger.debug("Parsed remark: description ='{}', Position='{}', status ='{}'",
+                    description, position, status);
+
+            if (status.equals("да")) {
+                statusComplete = NotificationStatus.COMPLETED;
+            } else {
+                statusComplete = NotificationStatus.UNCOMPLETED;
+            }
+            return new Notification(chatId, position, description, statusComplete, LocalDateTime.now());
+
+        } else {
+            logger.error("Failed to parse remark message. Input: '{}'", userInput);
+            throw new IncorrectMessageException("Неверный формат сообщения. Ожидается: 'Название замечания Позиция_установки Описание нарушения'");
+        }
+    }
+}

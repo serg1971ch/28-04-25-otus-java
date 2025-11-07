@@ -21,7 +21,7 @@ public interface NotificationService {
 
     Long getIdNotification(Notification notification);
 
-    RemarkWithImageDTO getRemarksForChat(long chatId, long noteId);
+    List<RemarkWithImageDTO> getRemarksForChat(long chatId);
 
     void sendMessage(long chatId, String message);
 

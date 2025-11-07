@@ -27,7 +27,6 @@ public class ImageTask {
 
     @Lob
     @Basic(fetch = FetchType.EAGER)
-    @Column(name = "bytes")
     private byte[] bytes;
 
     @ManyToOne

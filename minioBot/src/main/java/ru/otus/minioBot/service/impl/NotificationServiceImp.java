@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.otus.minioBot.exceptions.IncorrectMessageException;
-import ru.otus.minioBot.model.ImageTask;
 import ru.otus.minioBot.model.Notification;
 import ru.otus.minioBot.repository.ImageRepository;
 import ru.otus.minioBot.repository.NotificationsRepository;
@@ -36,9 +35,10 @@ public class NotificationServiceImp implements NotificationService {
     private final TelegramBot bot;
     private final MessageParsingService parsing;
 
-    public NotificationServiceImp(NotificationsRepository repository, ImageServiceDB imageService, TelegramBot bot, MessageParsingService parsing) {
+    public NotificationServiceImp(NotificationsRepository repository, ImageRepository imageRepository, ImageServiceDB imageService, TelegramBot bot, MessageParsingService parsing) {
         this.repository = repository;
         this.imageService = imageService;
+
         this.bot = bot;
         this.parsing = parsing;
     }
@@ -122,19 +122,20 @@ public class NotificationServiceImp implements NotificationService {
 
     @Transactional
     @Override
-    public Notification processRemarkInput(Long chatId, String commandAndData) throws IncorrectMessageException {
+    public Notification processRemarkInput( Long chatId, String commandAndData) throws IncorrectMessageException {
         Notification notification = parsing.parseRemarkMessage(commandAndData, chatId);
         logger.info("notification was taken: {}", notification.getComment());
         repository.save(notification);
-        return notification;
+        return  notification;
     }
 
     @Transactional
-    public RemarkWithImageDTO getRemarksForChat(long chatId, long noteId) {
-        List<ImageTask> imageTasks = imageService.getImageTasks(noteId);
-        String comment = repository.getReferenceById(noteId).getComment();
+    public List<RemarkWithImageDTO> getRemarksForChat(long chatId) {
+        List<Notification> notifications = repository.findByChatId(chatId);
 
-        // Implement this method in your ImageService
-        return new RemarkWithImageDTO(comment, imageTasks);
+        return notifications.stream().map(notification -> {
+            List<byte[]> imageData = imageService.getImageTask(notification.getId()); // Implement this method in your ImageService
+            return new RemarkWithImageDTO(notification.getComment(), imageData);
+        }).collect(Collectors.toList());
     }
 }

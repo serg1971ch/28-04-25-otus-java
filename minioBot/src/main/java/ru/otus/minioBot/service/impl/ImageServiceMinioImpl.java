@@ -9,16 +9,15 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import ru.otus.minioBot.exceptions.ImageUploadException;
-import ru.otus.minioBot.model.ImageTask;
+import ru.otus.minioBot.exceptions.NotificationNotFoundException;
 import ru.otus.minioBot.repository.ImageRepository;
 import ru.otus.minioBot.repository.NotificationsRepository;
 import ru.otus.minioBot.service.ImageServiceMinio;
 import ru.otus.minioBot.service.props.MinioProperties;
 
-import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.InputStream;
 
 @Log
 @Service
@@ -28,40 +27,35 @@ public class ImageServiceMinioImpl implements ImageServiceMinio {
     private final MinioClient minioClient;
     private final MinioProperties minioProperties;
     private final ImageServiceDBImpl imageServiceDB;
+    private final NotificationsRepository notificationsRepository;
     private final ImageRepository imageRepository;
 
     @Override
-    public List<String> upload(Long notificationId) {
-        String namePhoto;
-        List<String> namePhotos = new ArrayList<>();
-
+    public String upload(Long notificationId) {
         try {
             createBucket();
         } catch (Exception e) {
-            throw new ImageUploadException("Image upload failed: " + e.getMessage());
+            throw new ImageUploadException("Image upload failed: "
+                    + e.getMessage());
+        }
+        MultipartFile file = (MultipartFile) imageRepository.findByNotification_Id(notificationId)
+                .orElseThrow(() -> new NotificationNotFoundException("Замечание" + notificationId + " не найдено"));
+        String originalfileName = notificationsRepository.getById(notificationId).getComment();
+
+        log.info("name fo :" + originalfileName);
+        if (file.isEmpty()) {
+            throw new ImageUploadException("Image must have name.");
         }
 
-        List<ImageTask> tasks = imageServiceDB.getImageTasks(notificationId);
-
-        for (ImageTask task : tasks) {
-            namePhoto = task.getName();
-
-            if (namePhoto.isEmpty()) {
-                log.info("No filename found for image data of notificationId: {}" + notificationId);
-                throw new ImageUploadException("Image must have name.");
-            }
-
-            byte[] data = task.getBytes();
-
-            if (data == null || data.length == 0) {
-                log.info("Skipping empty image for filename: {}" + namePhoto);
-                continue;
-            }
-            saveImage(data, namePhoto);
-            namePhotos.add(namePhoto);
+        InputStream inputStream;
+        try {
+            inputStream = file.getInputStream();
+        } catch (Exception e) {
+            throw new ImageUploadException("Image upload failed: "
+                    + e.getMessage());
         }
-
-        return namePhotos;
+        saveImage(inputStream, originalfileName);
+        return originalfileName;
     }
 
     @SneakyThrows
@@ -76,14 +70,14 @@ public class ImageServiceMinioImpl implements ImageServiceMinio {
         }
     }
 
-//    private Pair<ImageTask, String> findImageName(Long imageId) {
-//        return imageServiceDB.getImageTasks();
-//    }
+    private Pair<byte[], String> findImageName(Long imageId) {
+        return imageServiceDB.getImagesFromDB(imageId);
+    }
 
     @SneakyThrows
-    private void saveImage(byte[] inputStream, String fileName) {
+    private void saveImage(InputStream inputStream, String fileName) {
         minioClient.putObject(PutObjectArgs.builder()
-                .stream(new ByteArrayInputStream(inputStream), inputStream.length, -1)
+                .stream(inputStream, inputStream.available(), -1)
                 .bucket(minioProperties.getBucket())
                 .object(fileName)
                 .build());

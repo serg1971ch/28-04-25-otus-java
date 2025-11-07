@@ -1,6 +1,6 @@
 package ru.otus.minioBot.repository;
 
-import jakarta.transaction.Transactional;
+import jakarta.persistence.Tuple;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ImageRepository extends JpaRepository<ImageTask, Long> {
+public interface ImageRepository extends JpaRepository<ImageTask, Long>, PagingAndSortingRepository<ImageTask, Long> {
     Optional<ImageTask> findByNotification_Id(Long id);
 
     @NotNull
@@ -28,15 +28,9 @@ public interface ImageRepository extends JpaRepository<ImageTask, Long> {
 
     String findAllByBytes(byte[] bytes);
 
-    String findNameByBytes(byte[] bytes);
+    byte[] getImageDataByNotificationId(Long notificationId);
 
-    @Query("SELECT i FROM ImageTask i WHERE i.notification.id = :noteId")
-    List<ImageTask> findByNotificationId(@Param("noteId") Long notificationId);
-//
-//    byte[] getImageDataByNotificationId(Long notificationId);
-
-    @Transactional
-    @Query("SELECT j.bytes FROM ImageTask j WHERE j.notification.id = :notificationId")
-    List<ImageTask> findBytesAndNameByNotificationId(@Param("notificationId") Long notificationId);
+    @Query("SELECT i.bytes FROM ImageTask i WHERE i.notification.id = :notificationId")
+    List<byte[]> findBytesAndNameByNotificationId(@Param("notificationId") Long notificationId);
 
 }

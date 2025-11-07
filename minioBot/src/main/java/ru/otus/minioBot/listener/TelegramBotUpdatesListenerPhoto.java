@@ -29,14 +29,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static ru.otus.minioBot.CommandConst.*;
+import static ru.otus.minioBot.CommandConst.CALLBACK_ADD_REMARK;
 import static ru.otus.minioBot.model.ChatState.*;
 
 @Slf4j
@@ -45,24 +47,19 @@ public class TelegramBotUpdatesListenerPhoto implements UpdatesListener {
     private final String downloadDirectory;
     private final TelegramBot telegramBot;
     private final NotificationService notificationService;
-    private final ImageServiceDB imageService;
-
-    private final ImageServiceFS imageServiceFS;
+    private final ImageServiceDB imageService; // Используйте его для сохранения фото
     private final Map<Long, ChatState> chatStates = new ConcurrentHashMap<>();
     private Notification responseMessage;
-    private final ImageServiceMinio serviceMinio;
     String noteName; // Предполагается, что это имя фотографии/заметки, которое может быть связано с состоянием
 
     private static final Pattern REMARK_INPUT_PATTERN = Pattern.compile("(.*;)(.[0-9]{3})(.[да|нет])."); // Этот паттерн, кажется, не используется в текущем коде
 
     public TelegramBotUpdatesListenerPhoto(TelegramBot telegramBot, NotificationService notificationService,
-                                           @Value("${app.download.dir:resources/photos}") String downloadDirectory, ImageServiceDB imageService, ImageServiceFS imageServiceFS, ImageServiceMinio serviceMinio) {
+                                           @Value("${app.download.dir:resources/photos}") String downloadDirectory, ImageServiceDB imageService) {
         this.telegramBot = telegramBot;
         this.notificationService = notificationService;
         this.downloadDirectory = downloadDirectory;
         this.imageService = imageService;
-        this.imageServiceFS = imageServiceFS;
-        this.serviceMinio = serviceMinio;
     }
 
     @PostConstruct
@@ -103,11 +100,7 @@ public class TelegramBotUpdatesListenerPhoto implements UpdatesListener {
                 handleCallbackQuery(callbackQuery, chatId);
             } else {
                 // Логика обработки текстовых сообщений и фото
-                try {
-                    handleMessage(message, chatId, currentState);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                handleMessage(message, chatId, currentState);
             }
         }
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
@@ -129,45 +122,39 @@ public class TelegramBotUpdatesListenerPhoto implements UpdatesListener {
         } else if (CALLBACK_SENT_ALL_PHOTOS.equals(data)) {
             log.info("Получена команда: {}", data);
             sendMessage(chatId, "Все ваши фото будут отправлены");
-            serviceMinio.upload(responseMessage.getId());
             chatStates.put(chatId, IDLE);
             sendMainMenuButtons(chatId);
-
         } else if (COMMAND_SENT_PHOTO_CALLBACK.equals(data)) {
             sendMessage(chatId, "Замечание отправлено, хотите добавить еще одно АПК?");
             log.info("Received callback query data: {} from chat {}", data, chatId);
-            if (responseMessage != null) {
-                List<String> photos = serviceMinio.upload(responseMessage.getId());
-                sendMessage(chatId, photos.get(0) + " " + photos.get(1) + " загружены");
-            }
             chatStates.put(chatId, IDLE);
             sendMainMenuBot(chatId);
         } else if (CALLBACK_MAIN_MENU.equals(data)) {
             sendMessage(chatId, "Здесь будет основное меню бота, а пока нажмите /start");
         } else if (CALLBACK_VIEW_REMARKS.equals(data)) {
             // Предполагается, что у вас есть метод для получения замечаний
-            RemarkWithImageDTO remark = getRemarksForChat(chatId, responseMessage.getId());
-            sendRemarksAsMessage(chatId, remark);
-            log.info("Вывод замечаний для чата {}: {}", chatId, remark);
+            List<RemarkWithImageDTO> remarks = getRemarksForChat(chatId);
+            sendRemarksAsMessage(chatId, remarks);
+            log.info("Вывод замечаний для чата {}: {}", chatId, remarks);
             chatStates.put(chatId, IDLE);
         } else {
             sendMessage(chatId, "Неизвестная команда из меню.");
         }
     }
 
-    private void handleMessage(Message message, long chatId, ChatState currentState) throws IOException {
+    private void handleMessage(Message message, long chatId, ChatState currentState) {
         String text = message.text();
         PhotoSize[] photoSizes = message.photo();
         chatStates.put(chatId, AWAITING_PHOTO_FOR_ADD_REMARK);
         // --- Обработка фото ---
         if (photoSizes != null && photoSizes.length > 0) {
             PhotoSize largestPhoto = photoSizes[photoSizes.length - 1];
-            Pair<Path, Notification> filePair = downloadPhotoFile(chatId, largestPhoto); // Скачиваем фото
+            var filePair = downloadPhotoFile(chatId, largestPhoto); // Скачиваем фото
             if (filePair != null) {
                 largestPhoto = photoSizes[photoSizes.length - 1];
 
                 chatStates.put(chatId, IDLE);
-                imageServiceFS.uploadImageFromFStoDB(filePair);
+                imageService.uploadImageFromFStoDB(filePair);
 
                 log.info("Результат сохраненного в базе фото: {}. Состояние бота на входе в обработку полученного фото: {}\n" +
                         " Messenger содержит текст - {}", filePair.getFirst().toString(), currentState, text);
@@ -266,6 +253,15 @@ public class TelegramBotUpdatesListenerPhoto implements UpdatesListener {
         }
     }
 
+    // Обработка команды /start
+//    private void handleStartCommand(long chatId, String firstName) {
+//        telegramBot.execute(new SendMessage(chatId, "Привет, " + firstName + "! 👋"));
+//        sendMainMenu(chatId); // Показываем главное меню
+//        chatStates.put(chatId, IDLE); // Убедимся, что состояние IDLE
+//        log.info("Sent welcome and main menu to chat {}. State set to IDLE.", chatId);
+//    }
+
+
     private Notification handleRemarkInput(long chatId, String inputText) {
         Matcher matcher = REMARK_INPUT_PATTERN.matcher(inputText);
 
@@ -290,8 +286,8 @@ public class TelegramBotUpdatesListenerPhoto implements UpdatesListener {
     }
 
     // Заглушка для получения списка замечаний
-    private RemarkWithImageDTO getRemarksForChat(long chatId, long noteId) {
-        return notificationService.getRemarksForChat(chatId, noteId);
+    private List<RemarkWithImageDTO> getRemarksForChat(long chatId) {
+        return notificationService.getRemarksForChat(chatId);
     }
 
     private void sendMainMenuPhotk(long chatId) {
@@ -374,8 +370,8 @@ public class TelegramBotUpdatesListenerPhoto implements UpdatesListener {
     }
 
     // Ваш метод скачивания фото (перенесен сюда для удобства)
-    private Pair<Path, Notification> downloadPhotoFile(long chatId, PhotoSize photoSize) {
-        Pair<Path, Notification> notificationPair = null;
+    private Pair downloadPhotoFile(long chatId, PhotoSize photoSize) {
+        Pair<byte[], Notification> notificationPair = null;
         String fileId = photoSize.fileId();
         try {
             GetFile getFileRequest = new GetFile(fileId);
@@ -402,12 +398,11 @@ public class TelegramBotUpdatesListenerPhoto implements UpdatesListener {
             try (InputStream in = downloadUrl.openStream()) {
                 Files.copy(in, targetFilePath, StandardCopyOption.REPLACE_EXISTING);
                 log.info("Successfully downloaded file to: {}, chatState now: {}", targetFilePath, chatStates.get(chatId));
+//                chatStates.put(chatId, IDLE);
+//                sendMainMenuPhotk(chatId);
                 chatStates.put(chatId, AWAITING_PHOTO);
-
-                if (responseMessage != null) {
-                    notificationPair = Pair.of(targetFilePath, responseMessage);
-                    log.info("Successfully downloaded file to: {}, chatState now: {}", notificationPair.getSecond().getComment().replace(";", ""), chatStates.get(chatId));
-                }
+                notificationPair = Pair.of(in.readAllBytes(), responseMessage);
+                log.info("Successfully downloaded file to: {}, chatState now: {}", notificationPair.getSecond().getComment().replace(";", ""), chatStates.get(chatId));
 
                 return notificationPair;  // Возвращаем путь к скачанному файлу
             }
@@ -422,18 +417,22 @@ public class TelegramBotUpdatesListenerPhoto implements UpdatesListener {
         }
     }
 
-    public void sendRemarksAsMessage(long chatId, RemarkWithImageDTO remark) {
+    public void sendRemarksAsMessage(long chatId, List<RemarkWithImageDTO> remarks) {
         StringBuilder messageBuilder = new StringBuilder();
-        messageBuilder.append("Комментарий: ").append(remark.getComment()).append("n");
-        if (remark.getImageData() != null) {
-            List<byte[]> base64Image = remark.getImageData()
-                    .stream()
-                    .map(p -> p.getBytes())
-                    .filter(bytes -> bytes != null)  // пропускаем null
-                    .collect(Collectors.toList());
-            messageBuilder.append("![Изображение](data:image/png;base64,").append(base64Image).append(")n");
+
+        for (RemarkWithImageDTO remark : remarks) {
+            // Добавьте комментарий
+            messageBuilder.append("Комментарий: ").append(remark.getComment()).append("n");
+
+            // Если изображение доступно, его можно закодировать в Base64 и добавить в сообщение
+            if (remark.getImageData() != null) {
+                List<byte[]> base64Image = remark.getImageData();
+                messageBuilder.append("![Изображение](data:image/png;base64,").append(base64Image).append(")n");
+            }
+
+            messageBuilder.append("n"); // Разделитель между замечаниями
         }
-        messageBuilder.append("n"); // Разделитель между замечаниями
+
         sendMessage(chatId, messageBuilder.toString());
     }
 }
