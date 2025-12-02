@@ -1,0 +1,117 @@
+/* Добавляем эти стили в ваш CSS файл (например, style.css) */
+body {
+    margin: 0;
+    padding: 0;;
+    background-color: #f8f9fa; /* Светлый фон для всей страницы, если #background не нужен */
+}
+
+#background {
+    left: 0px;
+    top: 0px;
+    margin-left: auto;
+    margin-right: auto;
+    overflow: hidden;
+    background-image: url("../images/layer_1.png");
+    z-index:-1;
+}
+
+#layer_1 {
+    left: 250px;
+    bottom: 100px;
+    top: 55px;
+    width: 2600px;
+    height: 1320px;
+    background-image: url(../images/факел_окно.png) ;
+    background-repeat: no-repeat;
+    z-index:0;
+}
+
+#layer_5 {
+    left: 149px;
+    top: 50%;
+}
+
+/*#layer_1_0, #layer_4, #layer_5 {*/
+/*    position: relative; !* Changed from absolute to relative *!*/
+/*    margin: 20px auto; !* Центрируем и добавляем отступы *!*/
+/*    padding: 20px;*/
+/*    background-color: rgba(255, 255, 255, 0.8); !* Полупрозрачный белый фон для контента *!*/
+/*    border-radius: 10px;*/
+/*    z-index: 2; !* Убедимся, что контент поверх фона *!*/
+/*}*/
+
+/*#layer_4 img {*/
+/*    display: block; !* Убираем нижний отступ у img *!*/
+/*    max-width: 100%; !* Адаптивная ширина *!*/
+/*    height: auto;*/
+/*    margin: 10px auto; !* Центрируем изображение *!*/
+/*}*/
+
+
+ .image-container {
+     display: flex; /* Используем Flexbox для расположения изображений */
+     flex-direction: row; /* Изображения друг под другом */
+     align-items: center; /* Центрируем по горизонтали */
+     margin-bottom: 10px; /* Отступ снизу */
+     border: 1px solid #eee; /* Легкая рамка */
+     padding: 5px;
+     border-radius: 5px;
+ }
+.image-container img {
+    max-width: 150px; /* Ограничиваем ширину миниатюры */
+    height: auto; /* Сохраняем пропорции */
+    margin-bottom: 5px; /* Отступ между изображениями */
+    border: 1px solid #ccc; /* Рамка для каждого изображения */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Легкая тень */
+}
+/* Если у вас по два изображения на заметку, и вы хотите их в строку: */
+.image-row {
+    display: flex;
+    justify-content: space-around; /* Распределяем места */
+    flex-wrap: wrap; /* Перенос на новую строку, если не помещаются */
+}
+.image-cell {
+    text-align: center;
+    margin: 5px;
+    flex: 1; /* Равномерное распределение места */
+    min-width: 120px; /* Минимальная ширина для ячейки */
+}
+.image-cell img {
+    max-width: 100%; /* Адаптивная ширина */
+    height: auto;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+
+/* Дополнительные стили для элементов, если нужно */
+.container {
+    max-width: 2400px; /* Ограничиваем ширину контейнера, чтобы сетка работала лучше */
+}
+.table {
+    width: 100%; /* Таблица занимает всю доступную ширину */
+}
+
+.table td {
+    vertical-align: middle; /* Центрирование по вертикали */
+}
+
+/* Ваши новые стили для изображений */
+/*.image-row {*/
+/*    display: flex;*/
+/*    justify-content: space-around;*/
+/*    flex-wrap: wrap;*/
+/*}*/
+/*.image-cell {*/
+/*    text-align: center;*/
+/*    margin: 5px;*/
+/*    flex: 1;*/
+/*    min-width: 120px;*/
+/*}*/
+/*.image-cell img {*/
+/*    max-width: 100%;*/
+/*    height: auto;*/
+/*    border: 1px solid #ccc;*/
+/*    box-shadow: 0 2px 4px rgba(0,0,0,0.1);*/
+/*}*/
+
