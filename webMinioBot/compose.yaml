@@ -1,0 +1,9 @@
+services:
+  postgres:
+    image: 'postgres:latest'
+    environment:
+      - 'POSTGRES_DB=telegramBot'
+      - 'POSTGRES_PASSWORD=1234'
+      - 'POSTGRES_USER=postgres'
+    ports:
+      - '5432'
