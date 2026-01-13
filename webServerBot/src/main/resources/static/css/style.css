@@ -1,0 +1,150 @@
+/* Добавляем эти стили в ваш CSS файл (например, style.css) */
+body {
+    margin: 0;
+    padding: 0;;
+    background-color: #A5CCE9; /* Светлый фон для всей страницы, если #background не нужен */
+}
+
+#background {
+    left: 0px;
+    top: 0px;
+    margin-left: auto;
+    margin-right: auto;
+    overflow: hidden;
+    background-image: url("../images/layer_1.png");
+}
+
+#layer_1 {
+    left: 12%;
+    bottom: 200px;
+    top: 55px;
+    width: 95%;
+    height: 70%;
+    background-image: url(../images/факел_окно.png) ;
+    background-repeat: no-repeat;
+    background-size: contain;
+    position: absolute;
+    display: inline-block;
+}
+
+.nav {
+    top: 21%;
+    left: 28%;
+    width: 90%; /* адаптивная ширина */
+    max-width: 100px; /* ограничение максимальной ширины */
+    margin: 2rem auto; /* центрирование по горизонтали */
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.25) 0%, rgba(80, 57, 221, 0.25) 100%);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    padding: 0.75rem 0;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    position: relative; /* можно оставить, если нужно смещение */
+}
+
+.navbar-nav {
+    list-style: none; /* убираем маркеры списка */
+    display: flex; /* включаем Flexbox */
+    justify-content: center; /* центрируем элементы */
+    gap: 0.75rem; /* равномерные зазоры между пунктами */
+    padding: 0; /* сбрасываем стандартные отступы ul */
+    margin: 0; /* сбрасываем margin */
+}
+
+.nav-item {
+    padding: 0.5rem 1rem; /* адаптивные внутренние отступы */
+    margin: 0; /* отключаем margin — зазоры через gap */
+}
+
+.nav-link {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    opacity: 0.8; /* лёгкий эффект при наведении */
+}
+
+#h2_list {
+    top: 22%;
+    left: 42%;
+    position: relative;
+}
+
+#layer_5 {
+    left: 20px;
+    top: 73%;
+    padding-top: 100px;
+    margin-left: auto;
+    position: absolute;
+    z-index:1;
+}
+
+
+/*#layer_1_0, #layer_4, #layer_5 {*/
+/*    position: relative; !* Changed from absolute to relative *!*/
+/*    margin: 20px auto; !* Центрируем и добавляем отступы *!*/
+/*    padding: 20px;*/
+/*    background-color: rgba(255, 255, 255, 0.8); !* Полупрозрачный белый фон для контента *!*/
+/*    border-radius: 10px;*/
+/*    z-index: 2; !* Убедимся, что контент поверх фона *!*/
+/*}*/
+
+/*#layer_4 img {*/
+/*    display: block; !* Убираем нижний отступ у img *!*/
+/*    max-width: 100%; !* Адаптивная ширина *!*/
+/*    height: auto;*/
+/*    margin: 10px auto; !* Центрируем изображение *!*/
+/*}*/
+
+
+ .image-container {
+     display: flex; /* Используем Flexbox для расположения изображений */
+     flex-direction: row; /* Изображения друг под другом */
+     align-items: center; /* Центрируем по горизонтали */
+     margin-bottom: 10px; /* Отступ снизу */
+     border: 1px solid #eee; /* Легкая рамка */
+     padding: 5px;
+     border-radius: 5px;
+ }
+.image-container img {
+    max-width: 150px; /* Ограничиваем ширину миниатюры */
+    height: auto; /* Сохраняем пропорции */
+    margin-bottom: 5px; /* Отступ между изображениями */
+    border: 1px solid #ccc; /* Рамка для каждого изображения */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Легкая тень */
+}
+/* Если у вас по два изображения на заметку, и вы хотите их в строку: */
+.image-row {
+    display: flex;
+    justify-content: space-around; /* Распределяем места */
+    flex-wrap: wrap; /* Перенос на новую строку, если не помещаются */
+}
+.image-cell {
+    text-align: center;
+    margin: 5px;
+    flex: 1; /* Равномерное распределение места */
+    min-width: 120px; /* Минимальная ширина для ячейки */
+}
+.image-cell img {
+    max-width: 100%; /* Адаптивная ширина */
+    height: auto;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.container {
+    max-width: 2400px; /* Ограничиваем ширину контейнера, чтобы сетка работала лучше */
+}
+.table {
+    width: 100%; /* Таблица занимает всю доступную ширину */
+}
+
+.table td {
+    vertical-align: middle; /* Центрирование по вертикали */
+}
+
+
+
